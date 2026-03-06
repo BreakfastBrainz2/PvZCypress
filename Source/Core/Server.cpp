@@ -94,7 +94,7 @@ namespace Cypress
 	{
 		if (!g_program->GetServer()->IsUsingPlaylist())
 		{
-			CYPRESS_LOGTOSERVER(LogLevel::Info, "Server is not using a playlist.");
+			cc.push("Server is not using a playlist.");
 			return;
 		}
 
@@ -117,12 +117,12 @@ namespace Cypress
 		ServerPlayer* player = gameContext->m_serverPlayerManager->findHumanByName(playerName.c_str());
 		if (!player)
 		{
-			CYPRESS_LOGTOSERVER(LogLevel::Error, "Player {} not found!", playerName.c_str());
+			cc.push("Player {} not found!", playerName.c_str());
 			return;
 		}
 		if (player->isAIOrPersistentAIPlayer())
 		{
-			CYPRESS_LOGTOSERVER(LogLevel::Error, "Player {} is an AI!", playerName.c_str());
+			cc.push("Player {} is an AI!", playerName.c_str());
 			return;
 		}
 
@@ -131,7 +131,7 @@ namespace Cypress
 		{
 			eastlReason = reason.c_str();
 		}
-		CYPRESS_LOGTOSERVER(LogLevel::Info, "Kicked {} ({})", player->m_name, eastlReason.c_str());
+		cc.push("Kicked {} ({})", player->m_name, eastlReason.c_str());
 		player->disconnect(SecureReason_KickedOut, eastlReason);
 	}
 
@@ -164,7 +164,7 @@ namespace Cypress
 		{
 			eastlReason = reason.c_str();
 		}
-		CYPRESS_LOGTOSERVER(LogLevel::Info, "Kicked {} ({})", player->m_name, eastlReason.c_str());
+		cc.push("Kicked {} ({})", player->m_name, eastlReason.c_str());
 		player->disconnect(SecureReason_KickedOut, eastlReason);
 	}
 
@@ -276,9 +276,6 @@ namespace Cypress
 		float duration;
 
 		stream >> message >> duration;
-
-		//log duration
-		CYPRESS_LOGTOSERVER(LogLevel::Info, "Duration: {}", duration);
 
 		if (message.empty())
 		{
