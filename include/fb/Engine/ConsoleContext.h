@@ -1,6 +1,6 @@
 #pragma once
 #include <Core/Logging.h>
-#include <iostream>
+#include <sstream>
 
 //ConsoleStream class from KYBER
 class ConsoleStream
