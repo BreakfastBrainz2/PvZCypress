@@ -15,6 +15,7 @@ Cypress should build out out of the box as long as you're using Visual Studio 20
 TODO - more in depth instructions here
 
 Cypress is only compatible with v1.0.12 of Garden Warfare 2, and the latest version of Garden Warfare 1 (v1.0.3.0)
+After compiling the project, place the compiled dll in the game's directory and rename it to dinput8.dll
 
 An example batch file that launches a dedicated server can be found at Examples/Start_Dedicated.bat
 When run from the game directory, this will launch a Team Vanquish server on Zomboss Factory, with a max player count of 48.
