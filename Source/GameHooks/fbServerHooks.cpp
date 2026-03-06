@@ -195,7 +195,7 @@ DEFINE_HOOK(
 {
 	const char* playerName = ptrread<const char*>(msg, 0x48);
 	int nameLen = strlen(playerName);
-	if (nameLen < 3 || nameLen > 16)
+	if (nameLen < 3 || nameLen > 32) //og was 16
 	{
 		thisPtr->m_shouldDisconnect = true;
 		thisPtr->m_disconnectReason = 0x4;
@@ -206,18 +206,18 @@ DEFINE_HOOK(
 	{
 		if (iscntrl(static_cast<unsigned char>(*p)))
 		{
-			goto invalid_username_kick;
+			//goto invalid_username_kick;
 		}
 	}
 
-	static const char* bannedChars = "\t\n!\"#$%&'()*+,./:;<=>?@[\\]^`{|}~";
-	if (strpbrk(playerName, bannedChars) != nullptr)
-	{
-	invalid_username_kick:
-		thisPtr->m_shouldDisconnect = true;
-		thisPtr->m_disconnectReason = 0x4;
-		thisPtr->m_reasonText = "Invalid Characters in Username";
-	}
+	//static const char* bannedChars = "\t\n!\"#$%&'()*+,./:;<=>?@[\\]^`{|}~";
+	//if (strpbrk(playerName, bannedChars) != nullptr)
+	//{
+	//invalid_username_kick:
+	//	thisPtr->m_shouldDisconnect = true;
+	//	thisPtr->m_disconnectReason = 0x4;
+	//	thisPtr->m_reasonText = "Invalid Characters in Username";
+	//}
 
 	CYPRESS_LOGTOSERVER(LogLevel::Info, "{} is trying to join from machine {}", playerName, thisPtr->m_machineId.c_str());
 	return Orig_fb_ServerConnection_onCreatePlayerMsg(thisPtr, msg);

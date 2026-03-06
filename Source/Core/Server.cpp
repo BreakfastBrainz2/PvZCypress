@@ -412,7 +412,7 @@ namespace Cypress
 		setup->m_name = playlistSetup->LevelName.c_str();
 		setup->setInlusionOption("GameMode", playlistSetup->GameMode.c_str());
 		setup->setInlusionOption("HostedMode", "ServerHosted");
-		setup->setInlusionOption("TOD", "Day");
+		setup->setInlusionOption("TOD", playlistSetup->TOD.c_str());
 #ifdef CYPRESS_GW2
 		if (!playlistSetup->Loadscreen_GamemodeName.empty())
 			setup->LoadScreen_GameMode = playlistSetup->Loadscreen_GamemodeName.c_str();

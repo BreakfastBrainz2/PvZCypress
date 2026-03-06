@@ -14,7 +14,6 @@ void Cypress_LogToServer(const char* msg, const char* fileName, int lineNumber, 
 
     char timePrefix[64];
     strftime(timePrefix, sizeof(timePrefix), "[%d.%m.%Y %H:%M:%S]", tm_info);
-#if _DEBUG
 
     const char* filePath = strrchr(fileName, '\\');
     if (filePath == nullptr)
@@ -42,5 +41,4 @@ void Cypress_LogToServer(const char* msg, const char* fileName, int lineNumber, 
             SendMessage(*g_listBox, LB_SETCURSEL, pos, 1);
         }
     }
-#endif //_HAS_DEDICATED_SERVER
 }

@@ -9,6 +9,7 @@ struct PlaylistLevelSetup
 {
     std::string LevelName;
     std::string GameMode;
+    std::string TOD;
     std::string InclusionOptions;
     std::string SettingsToApply;
     std::string Loadscreen_GamemodeName;
@@ -71,6 +72,7 @@ public:
                     PlaylistLevelSetup levelSetup;
                     levelSetup.LevelName = setup["LevelName"].get<std::string>();
                     levelSetup.GameMode = setup["GameMode"].get<std::string>();
+                    levelSetup.TOD = setup["TOD"].get<std::string>();
                     if (setup.contains("SettingsToApply"))
                         levelSetup.SettingsToApply = setup["SettingsToApply"].get<std::string>();
 
