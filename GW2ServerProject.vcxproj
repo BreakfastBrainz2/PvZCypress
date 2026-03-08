@@ -214,6 +214,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\eastl_arena_allocator.h" />
+    <ClInclude Include="include\fb\Engine\ConsoleContext.h" />
+    <ClInclude Include="include\fb\Engine\ConsoleMethod.h" />
+    <ClInclude Include="include\fb\Engine\ConsoleRegistry.h" />
     <ClInclude Include="include\fb\Engine\ExecutionContext.h" />
     <ClInclude Include="include\fb\Engine\ITypedObject.h" />
     <ClInclude Include="include\fb\Engine\Message.h" />

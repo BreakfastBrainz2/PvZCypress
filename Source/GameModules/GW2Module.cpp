@@ -75,14 +75,17 @@ void Cypress::GW2Module::InitDedicatedServerPatches(Cypress::Server* pServer)
 
 void Cypress::GW2Module::RegisterCommands()
 {
-	CYPRESS_REGISTER_CONSOLE_FUNCTION( Server::ServerRestartLevel, "Server.RestartLevel", 0 );
-	CYPRESS_REGISTER_CONSOLE_FUNCTION( Server::ServerLoadLevel, "Server.LoadLevel", 0 );
-	CYPRESS_REGISTER_CONSOLE_FUNCTION( Server::ServerKickPlayer, "Server.KickPlayer", 0 );
-	CYPRESS_REGISTER_CONSOLE_FUNCTION( Server::ServerKickPlayerById, "Server.KickPlayerById", 0 );
-	CYPRESS_REGISTER_CONSOLE_FUNCTION( Server::ServerBanPlayer, "Server.BanPlayer", 0 );
-	CYPRESS_REGISTER_CONSOLE_FUNCTION( Server::ServerBanPlayerById, "Server.BanPlayerById", 0 );
-	CYPRESS_REGISTER_CONSOLE_FUNCTION( Server::ServerSay, "Server.Say", 0 );
-	//CYPRESS_REGISTER_CONSOLE_FUNCTION(ServerSayToPlayer, "Server.SayToPlayer", 0);
+	//optional arguments are labeled as opt<argument>
+	CYPRESS_REGISTER_CONSOLE_FUNCTION("Server", "RestartLevel", "", Server::ServerRestartLevel);
+	CYPRESS_REGISTER_CONSOLE_FUNCTION("Server", "LoadLevel", "<levelPath> <inclusionOptions> opt<loadScreenGameMode> opt<loadScreenLevelName> opt<loadScreenLevelDescription>", Server::ServerLoadLevel);
+	CYPRESS_REGISTER_CONSOLE_FUNCTION("Server", "KickPlayer", "<playerName> opt<reason>", Server::ServerKickPlayer);
+	CYPRESS_REGISTER_CONSOLE_FUNCTION("Server", "KickPlayerById", "<playerIndex> opt<reason>", Server::ServerKickPlayerById);
+	CYPRESS_REGISTER_CONSOLE_FUNCTION("Server", "BanPlayer", "<playerName> opt<reason>", Server::ServerBanPlayer);
+	CYPRESS_REGISTER_CONSOLE_FUNCTION("Server", "BanPlayerById", "<playerIndex> opt<reason>", Server::ServerBanPlayerById);
+	CYPRESS_REGISTER_CONSOLE_FUNCTION("Server", "Say", "<message> opt<duration>", Server::ServerSay);
+	CYPRESS_REGISTER_CONSOLE_FUNCTION("Server", "SayToPlayer", "<message> opt<duration>", Server::ServerSayToPlayer);
+	CYPRESS_REGISTER_CONSOLE_FUNCTION("Server", "LoadNextPlaylistSetup", "", Server::ServerLoadNextPlaylistSetup);
+	CYPRESS_REGISTER_CONSOLE_FUNCTION("Server", "UnbanPlayer", "<playerName>", Server::ServerUnbanPlayer);
 }
 
 #endif

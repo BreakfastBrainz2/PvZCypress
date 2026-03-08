@@ -20,72 +20,81 @@ using namespace fb;
 #if(HAS_DEDICATED_SERVER)
 namespace Cypress
 {
-	void Server::ServerRestartLevel(ArgList args)
-	{
-		void* fbServer = g_program->GetServer()->GetFbServerInstance();
-		if (!fbServer) return;
-
-#ifdef CYPRESS_GW2
-		void* curLevel = ptrread<void*>(fbServer, 0xF0);
-		if (!curLevel) return;
-#endif
-
-#ifdef CYPRESS_GW1
-		fb::LevelSetup* setup = (fb::LevelSetup*)((__int64)fbServer + 0x40);
-#else
-		fb::LevelSetup* setup = (fb::LevelSetup*)((__int64)curLevel + 0x118);
-#endif
-		if (!setup) return;
-
-		fb::PostServerLoadLevelMessage(setup, true, false);
+	void Server::ServerRestartLevel(fb::ConsoleContext& cc)
+	{ 
+		//fb::PVZServerLevelManager::restartLevel();
+		reinterpret_cast<void(__fastcall*)()>(CYPRESS_GW_SELECT(0x14078EDA0, 0x140674180))();
 	}
 
-	void Server::ServerLoadLevel(ArgList args)
+	void Server::ServerLoadLevel(fb::ConsoleContext& cc)
 	{
-		int numArgs = args.size();
-		if (numArgs < 2) return;
+		auto stream = cc.stream();
+		std::string levelName;
+		std::string inclusionOptions;
+		std::string levelDescription;
+		std::string loadScreenGameMode;
+		std::string loadScreenLevelName;
+		std::string loadScreenLevelDescription;
 
-		std::string& levelName = args[0];
-		std::string& inclusion = args[1];
+		stream >> levelName >> inclusionOptions >> levelDescription >> loadScreenGameMode >> loadScreenLevelName >> loadScreenLevelDescription;
+
+		if (inclusionOptions.find("GameMode=") == std::string::npos)
+		{
+			cc.push("InclusionOptions must contain GameMode, syntax is \'GameMode=GameModeName\'");
+			return;
+		}
+
+		if (inclusionOptions.find("TOD=") == std::string::npos)
+		{
+			cc.push("TOD InclusionOption not set, defaulting to Day");
+
+			if (!inclusionOptions.ends_with(";"))
+				inclusionOptions += ";";
+
+			inclusionOptions += "TOD=Day";
+		}
+
+		if (inclusionOptions.find("HostedMode=") == std::string::npos)
+		{
+			cc.push("HostedMode InclusionOption not set, defaulting to ServerHosted");
+
+			if (!inclusionOptions.ends_with(";"))
+				inclusionOptions += ";";
+
+			inclusionOptions += "HostedMode=ServerHosted";
+		}
 
 		LevelSetup setup;
-		if (strstr(levelName.c_str(), "Levels/") == 0)
+		if (!levelName.starts_with("Levels/"))
 		{
-			setup.m_name = std::format("Levels/{}/{}", levelName.c_str(), levelName.c_str());
+			setup.m_name = std::format("Levels/{}/{}", levelName, levelName);
 		}
 		else
 		{
-			setup.m_name = levelName.c_str();
+			setup.m_name = levelName;
 		}
-		setup.setInclusionOptions(inclusion.c_str());
+		setup.setInclusionOptions(inclusionOptions.c_str());
 
 #ifdef CYPRESS_GW2
-		// there's probably a better way to do this, but it works
-		switch (numArgs)
-		{
-		case 3:
-			setup.LoadScreen_GameMode = args[2].c_str();
-			break;
-		case 4:
-			setup.LoadScreen_GameMode = args[2].c_str();
-			setup.LoadScreen_LevelName = args[3].c_str();
-			break;
-		case 5:
-			setup.LoadScreen_GameMode = args[2].c_str();
-			setup.LoadScreen_LevelName = args[3].c_str();
-			setup.LoadScreen_LevelDescription = args[4].c_str();
-			break;
-		}
+		if (!loadScreenGameMode.empty())
+			setup.LoadScreen_GameMode = loadScreenGameMode;
+
+		if (!loadScreenLevelName.empty())
+			setup.LoadScreen_GameMode = loadScreenLevelName;
+
+		if (!loadScreenLevelDescription.empty())
+			setup.LoadScreen_LevelDescription = loadScreenLevelDescription;
 #endif
 
 		fb::PostServerLoadLevelMessage(&setup, true, false);
+		cc.push("Loading {} {}", levelName, inclusionOptions);
 	}
 
-	void ServerLoadNextPlaylistSetup(ArgList args)
+	void Server::ServerLoadNextPlaylistSetup(fb::ConsoleContext& cc)
 	{
 		if (!g_program->GetServer()->IsUsingPlaylist())
 		{
-			CYPRESS_LOGTOSERVER(LogLevel::Info, "Server is not using a playlist.");
+			cc.push("Server is not using a playlist.");
 			return;
 		}
 
@@ -93,75 +102,93 @@ namespace Cypress
 		g_program->GetServer()->LoadPlaylistSetup(nextSetup);
 	}
 
-	void Server::ServerKickPlayer(ArgList args)
+	void Server::ServerKickPlayer(fb::ConsoleContext& cc)
 	{
+		auto stream = cc.stream();
+		std::string playerName;
+		std::string reason;
+
+		stream >> playerName >> reason;
+
 		ServerGameContext* gameContext = ServerGameContext::GetInstance();
 		if (!gameContext) return;
 		if (!gameContext->m_serverPlayerManager) return;
 
-		ServerPlayer* player = gameContext->m_serverPlayerManager->findHumanByName(args[0].c_str());
+		ServerPlayer* player = gameContext->m_serverPlayerManager->findHumanByName(playerName.c_str());
 		if (!player)
 		{
-			CYPRESS_LOGTOSERVER(LogLevel::Error, "Player {} not found!", args[0].c_str());
+			cc.push("Player {} not found!", playerName.c_str());
 			return;
 		}
 		if (player->isAIOrPersistentAIPlayer())
 		{
-			CYPRESS_LOGTOSERVER(LogLevel::Error, "Player {} is an AI!", args[0].c_str());
+			cc.push("Player {} is an AI!", playerName.c_str());
 			return;
 		}
 
-		eastl::string reason = "Kicked by Admin";
-		if (args.size() > 1)
+		eastl::string eastlReason = "Kicked by Admin";
+		if (!reason.empty())
 		{
-			reason = args[1].c_str();
+			eastlReason = reason.c_str();
 		}
-		CYPRESS_LOGTOSERVER(LogLevel::Info, "Kicked {} ({})", player->m_name, reason.c_str());
-		player->disconnect(SecureReason_KickedOut, reason);
+		cc.push("Kicked {} ({})", player->m_name, eastlReason.c_str());
+		player->disconnect(SecureReason_KickedOut, eastlReason);
 	}
 
-	void Server::ServerKickPlayerById(ArgList args)
+	void Server::ServerKickPlayerById(fb::ConsoleContext& cc)
 	{
+		auto stream = cc.stream();
+		int playerIndex;
+		std::string reason;
+
+		stream >> playerIndex >> reason;
+
 		ServerGameContext* gameContext = ServerGameContext::GetInstance();
 		if (!gameContext) return;
 		if (!gameContext->m_serverPlayerManager) return;
 
-		ServerPlayer* player = gameContext->m_serverPlayerManager->getById(std::atoi(args[0].c_str()));
+		ServerPlayer* player = gameContext->m_serverPlayerManager->getById(playerIndex);
 		if (!player)
 		{
-			CYPRESS_LOGTOSERVER(LogLevel::Error, "Player {} not found!", args[0].c_str());
+			cc.push("No player found at index {}", playerIndex);
 			return;
 		}
 		if (player->isAIOrPersistentAIPlayer())
 		{
-			CYPRESS_LOGTOSERVER(LogLevel::Error, "Player {} is an AI!", args[0].c_str());
+			cc.push("Player {} (index {}) is an AI!", player->m_name, playerIndex);
 			return;
 		}
 
-		eastl::string reason = "Kicked by Admin";
-		if (args.size() > 1)
+		eastl::string eastlReason = "Kicked by Admin";
+		if (!reason.empty())
 		{
-			reason = args[1].c_str();
+			eastlReason = reason.c_str();
 		}
-		CYPRESS_LOGTOSERVER(LogLevel::Info, "Kicked {} ({})", player->m_name, reason.c_str());
-		player->disconnect(SecureReason_KickedOut, reason);
+		cc.push("Kicked {} ({})", player->m_name, eastlReason.c_str());
+		player->disconnect(SecureReason_KickedOut, eastlReason);
 	}
 
-	void Server::ServerBanPlayer(ArgList args)
+	void Server::ServerBanPlayer(fb::ConsoleContext& cc)
 	{
+		auto stream = cc.stream();
+		std::string playerName;
+		std::string reason;
+
+		stream >> playerName >> reason;
+
 		ServerGameContext* gameContext = ServerGameContext::GetInstance();
 		if (!gameContext) return;
 		if (!gameContext->m_serverPlayerManager) return;
 
-		ServerPlayer* player = gameContext->m_serverPlayerManager->findHumanByName(args[0].c_str());
+		ServerPlayer* player = gameContext->m_serverPlayerManager->findHumanByName(playerName.c_str());
 		if (!player)
 		{
-			CYPRESS_LOGTOSERVER(LogLevel::Error, "Player {} not found!", args[0].c_str());
+			cc.push("Player {} not found!", playerName.c_str());
 			return;
 		}
 		if (player->isAIOrPersistentAIPlayer())
 		{
-			CYPRESS_LOGTOSERVER(LogLevel::Error, "Player {} is an AI!", args[0].c_str());
+			cc.push("Player {} is an AI!", playerName.c_str());
 			return;
 		}
 
@@ -169,31 +196,38 @@ namespace Cypress
 		if (!connection) return;
 
 		eastl::string reasonText = "The Ban Hammer has spoken!";
-		if (args.size() > 1)
+		if (!reason.empty())
 		{
-			reasonText = args[1].c_str();
+			reasonText = reason.c_str();
 		}
+
 		g_program->GetServer()->GetServerBanlist()->AddToList(player->m_name, connection->m_machineId.c_str(), reasonText.c_str());
 		gameContext->m_serverPeer->m_bannedMachines.push_back(connection->m_machineId);
 		gameContext->m_serverPeer->m_bannedPlayers.push_back(player->m_name);
 		player->disconnect(SecureReason_Banned, reasonText);
 	}
 
-	void Server::ServerBanPlayerById(ArgList args)
+	void Server::ServerBanPlayerById(fb::ConsoleContext& cc)
 	{
+		auto stream = cc.stream();
+		int playerIndex;
+		std::string reason;
+
+		stream >> playerIndex >> reason;
+
 		ServerGameContext* gameContext = ServerGameContext::GetInstance();
 		if (!gameContext) return;
 		if (!gameContext->m_serverPlayerManager) return;
 
-		ServerPlayer* player = gameContext->m_serverPlayerManager->getById(std::atoi(args[0].c_str()));
+		ServerPlayer* player = gameContext->m_serverPlayerManager->getById(playerIndex);
 		if (!player)
 		{
-			CYPRESS_LOGTOSERVER(LogLevel::Error, "Player {} not found!", args[0].c_str());
+			cc.push("No player found at index {}", playerIndex);
 			return;
 		}
 		if (player->isAIOrPersistentAIPlayer())
 		{
-			CYPRESS_LOGTOSERVER(LogLevel::Error, "Player {} is an AI!", args[0].c_str());
+			cc.push("Player {} (index {}) is an AI!", player->m_name, playerIndex);
 			return;
 		}
 
@@ -201,9 +235,9 @@ namespace Cypress
 		if (!connection) return;
 
 		eastl::string reasonText = "Banned by server admin";
-		if (args.size() > 1)
+		if (!reason.empty())
 		{
-			reasonText = args[1].c_str();
+			reasonText = reason.c_str();
 		}
 		g_program->GetServer()->GetServerBanlist()->AddToList(player->m_name, connection->m_machineId.c_str(), reasonText.c_str());
 		gameContext->m_serverPeer->m_bannedMachines.push_back(connection->m_machineId);
@@ -211,64 +245,90 @@ namespace Cypress
 		player->disconnect(SecureReason_Banned, reasonText);
 	}
 
-	void Server::ServerUnbanPlayer(ArgList args)
+	void Server::ServerUnbanPlayer(fb::ConsoleContext& cc)
 	{
+		auto stream = cc.stream();
+		std::string playerName;
+
+		stream >> playerName;
+
 		ServerGameContext* gameContext = ServerGameContext::GetInstance();
 		if (!gameContext) return;
 
-		const char* playerName = args[0].c_str();
-		if (!g_program->GetServer()->GetServerBanlist()->IsBanned(playerName))
+		if (!g_program->GetServer()->GetServerBanlist()->IsBanned(playerName.c_str()))
 		{
-			CYPRESS_LOGTOSERVER(LogLevel::Info, "Player {} is not banned", playerName);
+			cc.push("Player {} is not banned", playerName);
 			return;
 		}
 
-		auto entry = g_program->GetServer()->GetServerBanlist()->GetPlayerEntry(playerName);
+		auto entry = g_program->GetServer()->GetServerBanlist()->GetPlayerEntry(playerName.c_str());
 		gameContext->m_serverPeer->removeBannedMachine(entry.MachineId.c_str());
 		gameContext->m_serverPeer->removeBannedPlayer(entry.Name.c_str());
-		g_program->GetServer()->GetServerBanlist()->RemoveFromList(playerName);
+		g_program->GetServer()->GetServerBanlist()->RemoveFromList(playerName.c_str());
 
-		CYPRESS_LOGTOSERVER(LogLevel::Info, "Player {} has been unbanned", playerName);
+		cc.push("Player {} has been unbanned", playerName);
 	}
 
-	void Server::ServerSay(ArgList args)
+	void Server::ServerSay(fb::ConsoleContext& cc)
 	{
-		if (args.size() < 2) return;
+		auto stream = cc.stream();
+		std::string message;
+		float duration;
 
+		stream >> message >> duration;
+
+		if (message.empty())
+		{
+			cc.push("Wrong parameters, missing message");
+			return;
+		}
+
+		//TODO: IMPL GW1
 		auto func = reinterpret_cast<void* (*)(__int64 arena, int localPlayerId)>(0x141FCEE70);
 		void* msg = func(0x1429386E0, 0);
 
-		fb::String msgText = args[0].c_str();
-		float duration = std::clamp(std::stof(args[1].c_str()), 1.0f, 10.0f);
+		fb::String msgText = message.c_str();
+		float messageDuration = std::clamp(duration, 1.0f, 10.0f);
+
 		ptrset<fb::String>(msg, 0x48, msgText);
-		ptrset<float>(msg, 0x50, duration);
+		ptrset<float>(msg, 0x50, messageDuration);
 
 		ServerGameContext::GetInstance()->m_serverPeer->sendMessage(msg, nullptr);
 	}
 
-	void Server::ServerSayToPlayer(ArgList args)
+	void Server::ServerSayToPlayer(fb::ConsoleContext& cc)
 	{
-		if (args.size() < 3) return;
+		auto stream = cc.stream();
+		std::string playerName;
+		std::string message;
+		float duration;
 
-		fb::ServerPlayer* player = ServerGameContext::GetInstance()->m_serverPlayerManager->findHumanByName(args[0].c_str());
+		stream >> playerName >> message >> duration;
+
+		fb::ServerPlayer* player = ServerGameContext::GetInstance()->m_serverPlayerManager->findHumanByName(playerName.c_str());
 		if (!player)
 		{
-			CYPRESS_LOGTOSERVER(LogLevel::Error, "Player {} not found!", args[0].c_str());
+			cc.push("Player {} not found!", playerName.c_str());
 			return;
 		}
 
 		fb::ServerConnection* connection = ServerGameContext::GetInstance()->m_serverPeer->connectionForPlayer(player);
 		if (!connection)
 		{
-			CYPRESS_LOGTOSERVER(LogLevel::Error, "Connection for player {} not found!", args[0].c_str());
+			cc.push("Connection for player {} not found!", playerName.c_str());
 			return;
 		}
 
+		//TODO: IMPL GW1
 		auto func = reinterpret_cast<void* (*)(__int64 arena, int localPlayerId)>(0x141FCEE70);
 		void* msg = func(0x1429386E0, 0);
 
-		fb::String msgText = args[1].c_str();
-		float duration = std::clamp(std::stof(args[2].c_str()), 1.0f, 10.0f);
+		fb::String msgText = message.c_str();
+		float messageDuration = std::clamp(duration, 1.0f, 10.0f);
+
+		ptrset<fb::String>(msg, 0x48, msgText);
+		ptrset<float>(msg, 0x50, messageDuration);
+
 		connection->sendMessage(msg);
 	}
 

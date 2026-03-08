@@ -1,11 +1,12 @@
 #pragma once
-#include <Kyber/SocketManager.h>
 #include <Core/Config.h>
-#include <fb/Engine/Server.h>
-#include <fb/Engine/LevelSetup.h>
+#include <Kyber/SocketManager.h>
 #include <ServerBanlist.h>
 #include <ServerPlaylist.h>
-#include <Core/Console/ConsoleFunctions.h>
+
+#include <fb/Engine/ConsoleContext.h>
+#include <fb/Engine/LevelSetup.h>
+#include <fb/Engine/Server.h>
 
 #if(HAS_DEDICATED_SERVER)
 namespace Cypress
@@ -62,15 +63,16 @@ namespace Cypress
 		static void InitDedicatedServer(void* thisPtr);
 
 		// Commands
-		static void ServerRestartLevel( ArgList args );
-		static void ServerLoadLevel( ArgList args );
-		static void ServerKickPlayer( ArgList args );
-		static void ServerKickPlayerById( ArgList args );
-		static void ServerBanPlayer( ArgList args );
-		static void ServerBanPlayerById( ArgList args );
-		static void ServerUnbanPlayer( ArgList args );
-		static void ServerSay( ArgList args );
-		static void ServerSayToPlayer( ArgList args );
+		static void ServerRestartLevel(fb::ConsoleContext& cc);
+		static void ServerLoadLevel(fb::ConsoleContext& cc);
+		static void ServerKickPlayer(fb::ConsoleContext& cc);
+		static void ServerKickPlayerById(fb::ConsoleContext& cc);
+		static void ServerBanPlayer(fb::ConsoleContext& cc);
+		static void ServerBanPlayerById(fb::ConsoleContext& cc);
+		static void ServerUnbanPlayer(fb::ConsoleContext& cc);
+		static void ServerSay(fb::ConsoleContext& cc);
+		static void ServerSayToPlayer(fb::ConsoleContext& cc);
+		static void ServerLoadNextPlaylistSetup(fb::ConsoleContext& cc);
 
 	private:
 		Kyber::SocketManager* m_socketManager;

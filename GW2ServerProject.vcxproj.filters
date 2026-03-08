@@ -177,6 +177,15 @@
     <ClInclude Include="include\GameModules\GW1Module.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\fb\Engine\ConsoleRegistry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fb\Engine\ConsoleMethod.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fb\Engine\ConsoleContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">

@@ -113,8 +113,6 @@ BOOL WINAPI ConsoleCloseHandler(DWORD ctrlType)
 
 namespace Cypress
 {
-	std::vector<Cypress::ConsoleFunction> g_consoleFunctions;
-
 	Program::Program(HMODULE inModule)
 		: m_hModule(inModule)
 		, m_client(nullptr)
