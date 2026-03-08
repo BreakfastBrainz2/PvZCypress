@@ -64,6 +64,7 @@ public:
                 {
                     m_mixedConfig.AvailableLevelsForModes[mode] = levels.get<std::vector<std::string>>();
                 }
+
             }
             else
             {
@@ -72,8 +73,9 @@ public:
                     PlaylistLevelSetup levelSetup;
                     levelSetup.LevelName = setup["LevelName"].get<std::string>();
                     levelSetup.GameMode = setup["GameMode"].get<std::string>();
-                    levelSetup.TOD = setup["TOD"].get<std::string>();
-                    if (setup.contains("SettingsToApply"))
+                    setup.contains("TOD")
+                        ? levelSetup.TOD = setup["TOD"].get<std::string>()
+                        : levelSetup.TOD = "Day";
                         levelSetup.SettingsToApply = setup["SettingsToApply"].get<std::string>();
 
                     setup.contains("Loadscreen_LevelName")
@@ -101,6 +103,11 @@ public:
                 }
             }
 
+            if (!m_mixedEnabled && !m_setups.empty())
+            {
+                m_currentSetup = m_setups[0];
+            }
+
             return true;
         }
 
@@ -111,7 +118,7 @@ public:
 
     bool AllRoundsCompletedForSetup() { return m_currentRoundsOnSetup == m_roundsPerSetup; }
 
-    void ResetRoundCount() { m_roundsPerSetup = 0; }
+    void ResetRoundCount() { m_currentRoundsOnSetup = 0; }
 
     void RoundCompleted()
     {
@@ -121,17 +128,17 @@ public:
             ResetRoundCount();
             m_shouldGetNewSetup = true;
         }
+        else
+        {
+            m_shouldGetNewSetup = false;
+
+        }
     }
 
     const PlaylistLevelSetup* GetMixedLevelSetup(bool forceNew)
     {
         if (!m_mixedEnabled)
             return nullptr;
-
-        if (!forceNew && !m_shouldGetNewSetup)
-        {
-            return &m_currentSetup;
-        }
 
         std::uniform_int_distribution<> modeDist(0, m_mixedConfig.AvailableModes.size() - 1);
 pick_mode:
@@ -167,19 +174,22 @@ pick_level:
 
         char buf[128];
         sprintf_s(buf, "GameMode=%s;TOD=%s", randomMode.c_str(), TODOption);
-        m_currentSetup.InclusionOptions = std::string(buf);
+        m_currentSetup.TOD = TODOption;
         m_shouldGetNewSetup = false;
         return &m_currentSetup;
     }
 
     const PlaylistLevelSetup* GetNextSetup(bool forceNew = false)
     {
-        if (IsMixedMode())
-            return GetMixedLevelSetup(forceNew);
+
 
         RoundCompleted();
+
         if (!m_shouldGetNewSetup)
             return &m_currentSetup;
+
+        if (IsMixedMode())
+            return GetMixedLevelSetup(false);
 
         m_currentSetupIndex++;
         if (m_currentSetupIndex >= m_setups.size())
@@ -188,7 +198,14 @@ pick_level:
         return &m_currentSetup;
     }
 
-    const PlaylistLevelSetup* GetSetup(int index) { return &m_setups[index]; }
+    const PlaylistLevelSetup* GetSetup(int index) 
+    {
+        if (IsMixedMode())
+            return GetMixedLevelSetup(false);
+
+        return &m_setups[index]; 
+    
+    }
 
     const PlaylistLevelSetup* GetCurrentSetup() { return &m_currentSetup; }
 

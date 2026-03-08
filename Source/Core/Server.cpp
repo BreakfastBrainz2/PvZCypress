@@ -463,6 +463,12 @@ namespace Cypress
 		{
 			CYPRESS_LOGTOSERVER(LogLevel::Info, "Loading first setup in playlist");
 			const PlaylistLevelSetup* playlistSetup = g_program->GetServer()->m_playlist.GetSetup(0);
+
+			if (g_program->GetServer()->m_playlist.IsMixedMode())
+				playlistSetup = g_program->GetServer()->m_playlist.GetMixedLevelSetup(0);
+			else
+				playlistSetup = g_program->GetServer()->m_playlist.GetSetup(0);
+
 			g_program->GetServer()->LevelSetupFromPlaylistSetup(&initialLevelSetup, playlistSetup);
 			g_program->GetServer()->ApplySettingsFromPlaylistSetup(playlistSetup);
 		}
