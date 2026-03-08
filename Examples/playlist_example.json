@@ -1,71 +1,59 @@
 {
   "RoundsPerSetup": 1,
   "IsMixed": false,
-  "Loadscreen_LevelDescriptionOverride": "This is my cool playlist",
   "PlaylistRotation": [
     {
       "LevelName": "Levels/Level_Coop_Snow/Level_Coop_Snow",
       "GameMode": "GnomeBomb0",
-      "TOD": "Day",
       "SettingsToApply": "GameMode.CheeseCapture false"
     },
     {
       "LevelName": "Levels/Level_Hub_TacoBandits/Level_Hub_TacoBandits",
-      "GameMode": "TeamVanquishLarge0",
-      "TOD": "Day"
+      "GameMode": "TeamVanquishLarge0"
     },
     {
       "LevelName": "Levels/Level_Coop_Rome/Level_Coop_Rome",
       "GameMode": "TacoBandits0",
-      "TOD": "Day",
       "SettingsToApply": "GameMode.TacoPanic true"
     },
     {
       "LevelName": "Levels/Level_Coop_Zomburbia/Level_Coop_Zomburbia",
       "GameMode": "VanquishConfirmedLarge0",
-      "TOD": "Day",
       "SettingsToApply": "GameMode.TacoPanic false|GameMode.FarewellTaco true"
     },
     {
       "LevelName": "Levels/Level_Rush_Suburbia/Level_Rush_Suburbia",
       "GameMode": "GnGLarge0",
-      "TOD": "Day",
       "SettingsToApply": "GameMode.FarewellTaco false"
     },
     {
       "LevelName": "Levels/Level_Coop_Brainstreet/Level_Coop_Brainstreet",
       "GameMode": "SuburbinationLarge0",
-      "TOD": "Day",
       "SettingsToApply": "GameMode.IceCreamRain true"
     },
     {
       "LevelName": "Levels/Level_Coop_ZombossFactory/Level_Coop_ZombossFactory",
       "GameMode": "TeamVanquishLarge0",
-      "TOD": "Day",
       "SettingsToApply": "GameMode.IceCreamRain false|GameMode.Salsa true"
     },
     {
       "LevelName": "Levels/Level_Herb_Brainstreet/Level_Herb_Brainstreet",
       "GameMode": "HerbalAssaultLarge0",
-      "TOD": "Day",
       "SettingsToApply": "GameMode.Salsa false|GameMode.RushDelivery true"
     },
     {
       "LevelName": "Levels/Level_Coop_Asia/Level_Coop_Asia",
       "GameMode": "TacoBandits0",
-      "TOD": "Day",
       "SettingsToApply": "GameMode.RushDelivery false"
     },
     {
       "LevelName": "Levels/Level_Coop_Egypt/Level_Coop_Egypt",
       "GameMode": "TeamElimination0",
-      "TOD": "Day",
       "SettingsToApply": "GameMode.Berserk true"
     },
     {
       "LevelName": "Levels/Level_Rush_Snow/Level_Rush_Snow",
       "GameMode": "GnGLarge0",
-      "TOD": "Day",
       "SettingsToApply": "GameMode.Berserk false|GameMode.CheeseCapture true"
     }
   ]
