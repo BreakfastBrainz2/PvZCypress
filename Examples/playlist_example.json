@@ -1,6 +1,7 @@
 {
   "RoundsPerSetup": 1,
   "IsMixed": false,
+  "Loadscreen_LevelDescriptionOverride": "This is my cool playlist",
   "PlaylistRotation": [
     {
       "LevelName": "Levels/Level_Coop_Snow/Level_Coop_Snow",
