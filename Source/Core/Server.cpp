@@ -34,12 +34,12 @@ namespace Cypress
 		auto stream = cc.stream();
 		std::string levelName;
 		std::string inclusionOptions;
-		std::string levelDescription;
 		std::string loadScreenGameMode;
 		std::string loadScreenLevelName;
 		std::string loadScreenLevelDescription;
+		std::string loadScreenUIAssetPath;
 
-		stream >> levelName >> inclusionOptions >> levelDescription >> loadScreenGameMode >> loadScreenLevelName >> loadScreenLevelDescription;
+		stream >> levelName >> inclusionOptions >> loadScreenGameMode >> loadScreenLevelName >> loadScreenLevelDescription >> loadScreenUIAssetPath;
 
 		if (inclusionOptions.find("GameMode=") == std::string::npos)
 		{
@@ -84,10 +84,14 @@ namespace Cypress
 			setup.LoadScreen_GameMode = loadScreenGameMode;
 
 		if (!loadScreenLevelName.empty())
-			setup.LoadScreen_GameMode = loadScreenLevelName;
+			setup.LoadScreen_LevelName = loadScreenLevelName;
 
 		if (!loadScreenLevelDescription.empty())
 			setup.LoadScreen_LevelDescription = loadScreenLevelDescription;
+		
+		if (!loadScreenUIAssetPath.empty())
+			setup.LoadScreen_UIAssetPath = loadScreenUIAssetPath;
+
 #endif
 
 		fb::PostServerLoadLevelMessage(&setup, true, false);
@@ -509,6 +513,8 @@ namespace Cypress
 			setup->LoadScreen_LevelName = playlistSetup->Loadscreen_LevelName.c_str();
 		if (!playlistSetup->Loadscreen_LevelDescription.empty())
 			setup->LoadScreen_LevelDescription = playlistSetup->Loadscreen_LevelDescription.c_str();
+		if (!playlistSetup->Loadscreen_UIAssetPath.empty())
+		setup->LoadScreen_UIAssetPath = playlistSetup->Loadscreen_UIAssetPath.c_str();
 #endif
 	}
 

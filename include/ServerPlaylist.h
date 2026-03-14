@@ -15,6 +15,7 @@ struct PlaylistLevelSetup
     std::string Loadscreen_GamemodeName;
     std::string Loadscreen_LevelName;
     std::string Loadscreen_LevelDescription;
+    std::string Loadscreen_UIAssetPath;
 };
 
 struct MixedModeConfig
@@ -48,6 +49,9 @@ public:
 
             if(playlistJson.contains("Loadscreen_LevelDescriptionOverride"))
                 m_loadscreenLevelDescription = playlistJson["Loadscreen_LevelDescriptionOverride"].get<std::string>();
+            
+            if (playlistJson.contains("Loadscreen_UIAssetPathOverride"))
+                m_loadscreenUIAssetPath = playlistJson["Loadscreen_UIAssetPathOverride"].get<std::string>();
 
             // init rng engine
             m_mtRNG = std::mt19937(m_rd());
@@ -91,6 +95,10 @@ public:
                     setup.contains("Loadscreen_LevelDescription")
                         ? levelSetup.Loadscreen_LevelDescription = setup["Loadscreen_LevelDescription"].get<std::string>()
                         : levelSetup.Loadscreen_LevelDescription = m_loadscreenLevelDescription;
+
+                    setup.contains("Loadscreen_UIAssetPath")
+                        ? levelSetup.Loadscreen_UIAssetPath = setup["Loadscreen_UIAssetPath"].get<std::string>()
+                        : levelSetup.Loadscreen_UIAssetPath = m_loadscreenUIAssetPath;
 
 
                     m_setups.push_back(levelSetup);
@@ -228,6 +236,7 @@ private:
     std::string m_loadscreenGamemodeName;
     std::string m_loadscreenLevelName;
     std::string m_loadscreenLevelDescription;
+    std::string m_loadscreenUIAssetPath;
     unsigned int m_currentRoundsOnSetup = 0;
     unsigned int m_roundsPerSetup = 1;
     unsigned int m_currentSetupIndex = 0;
